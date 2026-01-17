@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Drone Security Dashboard</title>
+    <style>
+        * {
+            font-weight: bold;
+            margin: 0;
+        }
+
+        body {
+            font-family: Arial;
+            text-align: center;
+            
+            margin: 0px;
+            background-color: #0f1014;
+            box-sizing: border-box;
+            color: white;
+            text-transform: capitalize;
+        }
+
+        a {
+            text-decoration: none;
+        }
+
+        .nav {
+            margin: 0;
+            width:100%;
+            height:10vh;
+            background-color: rgb(38, 40, 41);
+            color:white;
+            display:flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 25px;
+            text-shadow: 0px 0px 2px rgb(126, 232, 210);
+            overflow: hidden;
+            /* margin-bottom: 15px; */
+        }
+        .nav p{
+            margin-inline:20px ;
+        }
+
+        #alert {
+            font-size: 2em;
+            padding: 20px;
+            border-radius: 10px;
+            width: 300px;
+            margin: auto;
+            transition: 0.3s;
+        }
+
+        .alert {
+            background-color: red;
+            color: white;
+        }
+
+        .normal {
+            margin:10px;
+
+            background-color: rgb(41, 141, 41);
+            color: white;
+           transition:box-shadow 0.1s ease-in-out 0.1s;
+           transition:transform ease-in 0.1s;
+        }
+        .normal:hover{
+            box-shadow: rgba(79, 255, 220, 0.5) 0px 5px 15px;
+             transform: scale(1.03);
+        }
+
+        #clearBtn {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 1em;
+            cursor: pointer;
+        }
+        .display{
+            display:flex;
+            gap: 2%;
+             margin-inline:20px ;
+             margin-bottom: 25px;
+             
+             
+        }
+        .livevideo{
+            background-color: lightblue;
+            width:50%;
+            height:55vh;
+            border-radius: 10px;
+           transition:box-shadow 0.1s ease-in-out 0.1s;
+           transition:transform ease-in 0.1s;
+
+        }
+        .livevideo:hover{
+             box-shadow: rgba(79, 255, 220, 0.5) 0px 5px 15px;
+             transform: scale(1.03);
+        }
+        .location{
+             background-color: lightblue;
+            width:50%;
+            height:55vh;
+            border-radius: 10px;
+            transition:box-shadow 0.1s ease-in-out 0.1s;
+             transition:transform ease-in 0.1s;
+
+        }
+        .location:hover{
+            box-shadow: rgba(79, 255, 220, 0.5) 0px 5px 15px;
+            transform: scale(1.03);
+        }
+        .line{
+            height:2px;
+            background-color: white;
+              box-shadow: rgb(126, 232, 210) 0px 1px 5px 2px;
+              border-radius: 50%;
+              margin-bottom: 15px;
+
+        }
+        /* .navvideo{
+            background-color: lightblue;
+             height:9vh;
+             overflow: hidden;
+             margin: 0;
+             padding: 0;
+             width: 50%;
+        }
+        .video{
+            margin: 0;
+            width:5px;
+        } */
+        .takeoff{
+            height:5vh;
+            width:150px;
+            border-radius: 5px;
+            border: none;
+             /* transition:box-shadow 0.1s ease-in-out 0.1s; */
+             transition:transform ease-in 0.1s;
+        }
+        .takeoff:hover{
+            background-color: red;
+            color:white;
+             /* box-shadow: rgba(79, 255, 220, 0.5) 0px 5px 5px; */
+            transform: scale(1.03);
+        }
+        .return{
+            height:5vh;
+            width:150px;
+            border-radius: 5px;
+            border: none;
+            margin-left: 8px;
+            /* transition:box-shadow 0.1s ease-in-out 0.1s; */
+             transition:transform ease-in 0.1s;
+        }
+        .return:hover{
+            color:white;
+            background-color: lightblue;
+             /* box-shadow: rgba(79, 255, 220, 0.5) 0px 5px 5px; */
+            transform: scale(1.03);
+             
+        }
+    </style>
+</head>
+
+<body>
+    <div class="nav">
+        <p>Drone Security Dashboard beta version</p>
+         <div class="navvideo">
+        <!-- <video autoplay loop muted   >
+            <source src="INDIAN_ARMY_NATION_FIRST_1080p.mp4" type="video/mp4">
+        </video> -->
+        </div>
+        <p>tech forge</p>
+       
+    </div>
+    <div class="line"></div>
+    <div class="display">
+       <div class="livevideo">
+    <img src="/video_feed" style="width:100%; height:100%; border-radius:10px;">
+    </div>
+
+        <div class="location">
+            live location
+        </div>
+    </div>
+    <div id="alert" class="normal"> Area Clear</div><br>
+    <button id="takeoffBtn" class="takeoff">🚁 Take Off</button>
+    <button id="returnBtn" class="return">🔙 Return Home</button>
+    <p id="status">Status: Idle</p>
+    <button id="clearBtn">Clear Alert</button>
+
+    <script>
+        const takeoffBtn = document.getElementById("takeoffBtn");
+        const returnBtn = document.getElementById("returnBtn");
+        const status = document.getElementById("status");
+        const alertBox = document.getElementById("alert");
+
+        const alertSound = new Audio('/static/alert.mp3');
+        let lastAlert = "Normal";
+
+        /* ---------- BUTTON EVENTS (ONLY ONCE) ---------- */
+
+        takeoffBtn.addEventListener("click", () => {
+            fetch("/takeoff", { method: "POST" })
+                .then(res => res.text())
+                .then(data => {
+                    status.innerText = "Status: Drone Taking Off 🚁";
+                    console.log(data);
+                });
+        });
+
+        returnBtn.addEventListener("click", () => {
+            fetch("/return", { method: "POST" })
+                .then(res => res.text())
+                .then(data => {
+                    status.innerText = "Status: Returning Home 🔙";
+                    console.log(data);
+                });
+        });
+
+        /* ---------- ALERT UPDATE ---------- */
+
+        async function updateAlert() {
+            try {
+                const res = await fetch('/status');
+                const data = await res.json();
+
+                if (data.alert === "ALERT") {
+                    alertBox.innerText = "🚨 HUMAN DETECTED!";
+                    alertBox.className = "alert";
+
+                    if (lastAlert !== "ALERT") {
+                        alertSound.currentTime = 0;
+                        alertSound.play().catch(e => console.log("Audio blocked"));
+                    }
+                } else {
+                    alertBox.innerText = "✅ Area Clear";
+                    alertBox.className = "normal";
+
+                    alertSound.pause();
+                    alertSound.currentTime = 0;
+                }
+
+                lastAlert = data.alert;
+
+            } catch (err) {
+                console.error("Fetch error:", err);
+            }
+        }
+
+        /* ---------- CLEAR ALERT ---------- */
+
+        document.getElementById('clearBtn').addEventListener('click', async () => {
+            await fetch('/clear', { method: 'POST' });
+            updateAlert();
+        });
+
+        setInterval(updateAlert, 500);
+        updateAlert();
+    </script>
+
+
+</body>
+
+</html>
